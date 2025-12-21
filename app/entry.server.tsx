@@ -67,6 +67,10 @@ async function handleRequest(...args: DocRequestArgs) {
 								fetch: {
 									'connect-src': [
 										MODE === 'development' ? 'ws:' : undefined,
+										// Spotlight (SSE to the sidecar)
+										MODE === 'development'
+											? 'http://localhost:8969'
+											: undefined,
 										process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
 										"'self'",
 									],

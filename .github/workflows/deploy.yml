@@ -233,7 +233,7 @@ jobs:
       - name: Create Sentry release
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: kasper-peulen-d2924a93"
+          SENTRY_ORG: "kasper-peulen-d2924a93"
           SENTRY_PROJECT: "epic-rsc-stack"
         if: ${{ env.SENTRY_AUTH_TOKEN }}
         uses: getsentry/action-release@v3
