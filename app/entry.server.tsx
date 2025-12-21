@@ -68,6 +68,10 @@ async function handleRequest(...args: DocRequestArgs) {
 									'connect-src': [
 										MODE === 'development' ? 'ws:' : undefined,
 										process.env.SENTRY_DSN ? '*.sentry.io' : undefined,
+										// Spotlight (SSE to the sidecar)
+										MODE === 'development'
+											? 'http://localhost:8969'
+											: undefined,
 										"'self'",
 									],
 									'font-src': ["'self'"],
