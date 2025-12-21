@@ -233,8 +233,8 @@ jobs:
       - name: Create Sentry release
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          # SENTRY_ORG: 'your sentry org id or slug'
-          # SENTRY_PROJECT: 'your sentry project id or slug'
+          SENTRY_ORG: kasper-peulen-d2924a93"
+          SENTRY_PROJECT: "epic-rsc-stack"
         if: ${{ env.SENTRY_AUTH_TOKEN }}
         uses: getsentry/action-release@v3
         with:
