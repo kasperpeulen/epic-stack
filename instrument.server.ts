@@ -8,7 +8,6 @@ Sentry.init({
 	// See https://spotlightjs.com/ for how to install the Spotlight Desktop app for local development
 	spotlight: process.env.NODE_ENV === 'development',
 	environment: process.env.SENTRY_ENVIRONMENT,
-	release: process.env.SENTRY_RELEASE,
 	denyUrls: [
 		/\/resources\/healthcheck/,
 		// TODO: be smarter about the public assets...
