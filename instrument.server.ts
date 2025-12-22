@@ -42,5 +42,3 @@ Sentry.init({
 	// Enable logs to be sent to Sentry
 	enableLogs: true,
 })
-
-console.log('process.env.SENTRY_RELEASE', process.env.SENTRY_RELEASE)
