@@ -11,6 +11,7 @@ Sentry.init({
 	environment: process.env.SENTRY_ENVIRONMENT,
 	denyUrls: [
 		/\/resources\/healthcheck/,
+		// TODO: be smarter about the public assets...
 		/\/favicons\//,
 		/\/img\//,
 		/\/fonts\//,
