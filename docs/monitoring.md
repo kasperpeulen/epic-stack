@@ -63,7 +63,11 @@ workflow. Note that these do not need to be added to the
 used during the build and not the runtime.
 
 The Sentry Vite plugin in [`vite.config.ts`](../vite.config.ts) will create
-sentry releases for you and automatically associate commits during the vite
+sentry releases for you and automatically upload sourcemaps during the vite
 build once the `SENTRY_AUTH_TOKEN` is set. In this setup we have utilized a
 simple strategy for naming releases of using the commit sha, passed in as a
 build arg via the GitHub action workflow.
+
+Once the deploy is done, the "Create Sentry release" step in the
+[`deploy`](../.github/workflows/deploy.yml) script will associate commits to
+this release and mark the release as deployed and finalized.
