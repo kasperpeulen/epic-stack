@@ -1,6 +1,8 @@
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import * as Sentry from '@sentry/react-router'
 
+console.log('process.env.COMMIT_SHA', process.env.COMMIT_SHA)
+
 Sentry.init({
 	release: process.env.COMMIT_SHA,
 	// Sentry will only send requests if the dsn is defined
