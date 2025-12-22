@@ -71,3 +71,7 @@ build arg via the GitHub action workflow.
 Once the deploy is done, the "Create Sentry release" step in the
 [`deploy`](../.github/workflows/deploy.yml) script will associate commits to
 this release and mark the release as deployed and finalized.
+
+You can test Sentry, by visiting the deployed app and navigating to the
+`/sentry/example-page` route. Note that you need to be logged in as an admin
+user to visit it.
