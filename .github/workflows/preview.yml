@@ -41,7 +41,7 @@ jobs:
       - name: 🏗️ Create Fly app and provision resources
         if: github.event.action != 'closed'
         run: |
-          APP_NAME="pr-${{ github.event.number }}-${{ steps.app_name.outputs.value }}"
+          APP_NAME="pr2-${{ github.event.number }}-${{ steps.app_name.outputs.value }}"
           
           # Create app if it doesn't exist
           if ! flyctl status --app "$APP_NAME"; then
@@ -56,7 +56,7 @@ jobs:
         id: deploy
         uses: superfly/fly-pr-review-apps@1.5.0
         with:
-          name: pr-${{ github.event.number }}-${{ steps.app_name.outputs.value }}
+          name: pr2-${{ github.event.number }}-${{ steps.app_name.outputs.value }}
           config: fly.preview.toml
           secrets: |
             ALLOW_INDEXING=false SESSION_SECRET=super-duper-s3cret INTERNAL_COMMAND_TOKEN=super-duper-s3cret HONEYPOT_SECRET=super-duper-s3cret
