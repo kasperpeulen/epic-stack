@@ -1,11 +1,37 @@
-# fly.preview.toml
-# Configuration for preview apps
-# Extends the base fly.toml configuration
+app = "epic-rsc-stack"
+primary_region = "ams"
+kill_signal = "SIGINT"
+kill_timeout = 5
 
-extends = "fly.toml"
+[mounts]
+source = "data"
+destination = "/data"
 
-# Override http service settings for review apps to auto-suspend and save costs
+[build]
+dockerfile = "/other/Dockerfile"
+ignorefile = "/other/Dockerfile.dockerignore"
+
 [http_service]
-  auto_stop_machines = "suspend"
-  auto_start_machines = true
-  min_machines_running = 0
+internal_port = 8080
+force_https = true
+auto_stop_machines = "suspend"
+auto_start_machines = true
+
+[http_service.concurrency]
+type = "requests"
+soft_limit = 80
+hard_limit = 100
+
+[[http_service.checks]]
+grace_period = "5s"
+interval = "10s"
+method = "get"
+path = "/resources/healthcheck"
+timeout = "2s"
+
+[[http_service.checks]]
+grace_period = "10s"
+interval = "30s"
+method = "get"
+path = "/litefs/health"
+timeout = "5s"
