@@ -10,7 +10,7 @@ env:
   FLY_ORG: personal
 
 jobs:
-  review_app:
+  preview-app:
     runs-on: ubuntu-latest
     outputs:
       url: ${{ steps.deploy.outputs.url }}
@@ -18,10 +18,10 @@ jobs:
     concurrency:
       group: pr-${{ github.event.number }}
 
-    # Deploying apps with this "review" environment allows the URL for the app to be displayed in the PR UI.
+    # Deploying apps with this "preview" environment allows the URL for the app to be displayed in the PR UI.
     # Feel free to change the name of this environment.
     environment:
-      name: review
+      name: preview
       # The script in the `deploy` sets the URL output for each review app.
       url: ${{ steps.deploy.outputs.url }}
     steps:
@@ -38,7 +38,7 @@ jobs:
       - name: 🎈 Setup Fly
         uses: superfly/flyctl-actions/setup-flyctl@1.5
 
-      - name: Create Fly app and provision resources
+      - name: 🏗️ Create Fly app and provision resources
         if: github.event.action != 'closed'
         run: |
           APP_NAME="pr-${{ github.event.number }}-${{ steps.app_name.outputs.value }}"
@@ -52,7 +52,7 @@ jobs:
             flyctl storage create --yes --app $APP_NAME --name epic-stack-$APP_NAME > /dev/null 2>&1
           fi
 
-      - name: Deploy PR app to Fly.io
+      - name: 🚁 Deploy PR app to Fly.io
         id: deploy
         uses: superfly/fly-pr-review-apps@1.5.0
         with:
