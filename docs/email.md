@@ -13,7 +13,7 @@ both prod and staging:
 
 ```sh
 fly secrets set RESEND_API_KEY="re_blAh_blaHBlaHblahBLAhBlAh" --app [YOUR_APP_NAME]
-fly secrets set RESEND_API_KEY="re_blAh_blaHBlaHblahBLAhBlAh" --app [YOUR_APP_NAME]-staging
+gh secret set RESEND_API_KEY -e staging --body "re_blAh_blaHBlaHblahBLAhBlAh"
 ```
 
 Setup a [custom sending domain](https://resend.com/domains) and then make sure

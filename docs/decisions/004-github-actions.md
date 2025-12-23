@@ -38,7 +38,7 @@ it is free for open source projects, but paid for private projects.
 
 We've decided to use GitHub Actions for Continuous Integration in the Epic
 Stack. We have a single action that handles running linting, type checking,
-tests, and deployment to both staging (`dev` branch) and production (`main`
+tests, and deployment to both staging (each PR) and production (`main`
 branch).
 
 ## Consequences
