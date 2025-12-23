@@ -1,0 +1,64 @@
+name: 🚁 Preview
+on:
+  # Run this workflow on every PR event. Existing review apps will be updated when the PR is updated.
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+env:
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  FLY_REGION: ams
+  FLY_ORG: personal
+
+jobs:
+  review_app:
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    # Only run one deployment at a time per PR.
+    concurrency:
+      group: pr-${{ github.event.number }}
+
+    # Deploying apps with this "review" environment allows the URL for the app to be displayed in the PR UI.
+    # Feel free to change the name of this environment.
+    environment:
+      name: review
+      # The script in the `deploy` sets the URL output for each review app.
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Get code
+        uses: actions/checkout@v4
+
+      - name: 👀 Read app name
+        uses: SebRollen/toml-action@v1.2.0
+        id: app_name
+        with:
+          file: 'fly.toml'
+          field: 'app'
+
+      - name: 🎈 Setup Fly
+        uses: superfly/flyctl-actions/setup-flyctl@1.5
+
+      - name: Create Fly app and provision resources
+        if: github.event.action != 'closed'
+        run: |
+          APP_NAME="pr-${{ github.event.number }}-${{ steps.app_name.outputs.value }}"
+          
+          # Create app if it doesn't exist
+          if ! flyctl status --app "$APP_NAME"; then
+            flyctl apps create $APP_NAME --org ${{ env.FLY_ORG }}
+            flyctl volumes create data --region ${{ env.FLY_REGION }} --size 1 --yes --app $APP_NAME
+            flyctl consul attach --app $APP_NAME
+            flyctl storage create --yes --app $APP_NAME --name epic-stack-$APP_NAME
+          fi
+
+      - name: Deploy PR app to Fly.io
+        id: deploy
+        uses: superfly/fly-pr-review-apps@1.5.0
+        with:
+          name: pr-${{ github.event.number }}-${{ steps.app_name.outputs.value }}
+          secrets: |
+            ALLOW_INDEXING=false SESSION_SECRET=super-duper-s3cret INTERNAL_COMMAND_TOKEN=super-duper-s3cret HONEYPOT_SECRET=super-duper-s3cret
+          build_args: |
+            COMMIT_SHA=${{ github.sha }}
+          build_secrets: |
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
