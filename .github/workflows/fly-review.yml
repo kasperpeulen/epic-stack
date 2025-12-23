@@ -48,7 +48,8 @@ jobs:
             flyctl apps create $APP_NAME --org ${{ env.FLY_ORG }}
             flyctl volumes create data --region ${{ env.FLY_REGION }} --size 1 --yes --app $APP_NAME
             flyctl consul attach --app $APP_NAME
-            flyctl storage create --yes --app $APP_NAME --name epic-stack-$APP_NAME
+            # Don't log the created tigris secrets! 
+            flyctl storage create --yes --app $APP_NAME --name epic-stack-$APP_NAME > /dev/null 2>&1
           fi
 
       - name: Deploy PR app to Fly.io
@@ -56,6 +57,7 @@ jobs:
         uses: superfly/fly-pr-review-apps@1.5.0
         with:
           name: pr-${{ github.event.number }}-${{ steps.app_name.outputs.value }}
+          config: fly.preview.toml
           secrets: |
             ALLOW_INDEXING=false SESSION_SECRET=super-duper-s3cret INTERNAL_COMMAND_TOKEN=super-duper-s3cret HONEYPOT_SECRET=super-duper-s3cret
           build_args: |

@@ -1,0 +1,11 @@
+# fly.preview.toml
+# Configuration for preview apps
+# Extends the base fly.toml configuration
+
+extends = "fly.toml"
+
+# Override http service settings for review apps to auto-suspend and save costs
+[http_service]
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
