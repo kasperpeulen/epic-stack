@@ -24,11 +24,10 @@ Prior to your first deployment, you'll need to do a few things:
    > terminal, run `fly auth whoami` and ensure the email matches the Fly
    > account signed into the browser.
 
-3. Create two apps on Fly, one for staging and one for production:
+3. Create a Fly app for production:
 
    ```sh
    fly apps create [YOUR_APP_NAME]
-   fly apps create [YOUR_APP_NAME]-staging
    ```
 
    > **Note**: Make sure this name matches the `app` set in your `fly.toml`
@@ -60,32 +59,22 @@ Prior to your first deployment, you'll need to do a few things:
 
   ```sh
   fly secrets set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32) --app [YOUR_APP_NAME]
-  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32) --app [YOUR_APP_NAME]-staging
   ```
 
   > **Note**: If you don't have openssl installed, you can also use
   > [1Password](https://1password.com/password-generator) to generate a random
   > secret, just replace `$(openssl rand -hex 32)` with the generated secret.
 
-- Add a `ALLOW_INDEXING` with `false` value to your non-production fly app
-  secrets, this is to prevent duplicate content from being indexed multiple
-  times by search engines. To do this you can run the following commands:
-
-  ```sh
-  fly secrets set ALLOW_INDEXING=false --app [YOUR_APP_NAME]-staging
-  ```
-
 6. Create production database:
 
-   Create a persistent volume for the sqlite database for both your staging and
-   production environments. Run the following (feel free to change the GB size
-   based on your needs and the region of your choice
+   Create a persistent volume for the sqlite database for both your production
+   environments. Run the following (feel free to change the GB size based on
+   your needs and the region of your choice
    (`https://fly.io/docs/reference/regions/`). If you do change the region, make
    sure you change the `primary_region` in fly.toml as well):
 
    ```sh
    fly volumes create data --region sjc --size 1 --app [YOUR_APP_NAME]
-   fly volumes create data --region sjc --size 1 --app [YOUR_APP_NAME]-staging
    ```
 
 7. Attach Consul:
@@ -96,14 +85,12 @@ Prior to your first deployment, you'll need to do a few things:
 
   ```sh
   fly consul attach --app [YOUR_APP_NAME]
-  fly consul attach --app [YOUR_APP_NAME]-staging
   ```
 
 8. Set up Tigris object storage:
 
    ```sh
    fly storage create --app [YOUR_APP_NAME]
-   fly storage create --app [YOUR_APP_NAME]-staging
    ```
 
    This will create a Tigris object storage bucket for both your production and
@@ -119,7 +106,7 @@ Prior to your first deployment, you'll need to do a few things:
 
    Now that everything is set up you can commit and push your changes to your
    repo. Every commit to your `main` branch will trigger a deployment to your
-   production environment, and every commit to your `dev` branch will trigger a
+   production environment, and every commit to a PR will trigger a
    deployment to your staging environment.
 
 ---
