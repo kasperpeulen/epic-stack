@@ -1,4 +1,4 @@
-app = "epic-rsc-stack"
+app = "pr-{{ pr-number }}-epic-rsc-stack"
 primary_region = "ams"
 kill_signal = "SIGINT"
 kill_timeout = 5
@@ -22,6 +22,7 @@ internal_port = 8080
 processes = [ "app" ]
 protocol = "tcp"
 script_checks = [ ]
+# preview apps are suspended after 5 min of activity to save costs
 auto_stop_machines = "suspend"
 auto_start_machines = true
 
