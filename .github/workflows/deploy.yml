@@ -221,25 +221,13 @@ jobs:
           if ! flyctl status --app "$FLY_APP_NAME"; then
             # change org name if needed
             flyctl apps create $FLY_APP_NAME --org $FLY_ORG
-            flyctl secrets --app $FLY_APP_NAME set \
-              SESSION_SECRET=$(openssl rand -hex 32) \
-              HONEYPOT_SECRET=$(openssl rand -hex 32) \
-              SENTRY_DSN=${{ secrets.SENTRY_DSN }} \
-              RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            flyctl secrets --app $FLY_APP_NAME set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32) SENTRY_DSN=${{ secrets.SENTRY_DSN }} RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
             flyctl consul attach --app $FLY_APP_NAME
             # Don't log the created tigris secrets!
             flyctl storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
           fi
 
-          flyctl deploy \
-            --ha false \
-            --regions $FLY_REGION \
-            --vm-size shared-cpu-1x \
-            --env APP_ENV=staging ALLOW_INDEXING=false \
-            --app $FLY_APP_NAME \             
-            --image-label ${{ github.sha }} \
-            --build-arg COMMIT_SHA=${{ github.sha }} \
-            --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+          flyctl deploy --ha false --regions $FLY_REGION --vm-size shared-cpu-1x --env APP_ENV=staging --env ALLOW_INDEXING=false --app $FLY_APP_NAME --image-label ${{ github.sha }} --build-arg COMMIT_SHA=${{ github.sha }} --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: 🧹 Cleanup resources when PR is closed
         if: github.event.action == 'closed'
