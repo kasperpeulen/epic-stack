@@ -228,6 +228,7 @@ jobs:
           name: ${{ steps.app_name.outputs.value }}-pr-${{ github.event.number }}
           secrets: |
             APP_ENV=staging
+            SENTRY_ENVIRONMENT=staging
             ALLOW_INDEXING=false
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
             RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
