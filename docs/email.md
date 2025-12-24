@@ -13,6 +13,7 @@ both prod and staging:
 
 ```sh
 fly secrets set RESEND_API_KEY="re_blAh_blaHBlaHblahBLAhBlAh" --app [YOUR_APP_NAME]
+# See how to install gh: https://cli.github.com/ 
 gh secret set RESEND_API_KEY -e staging --body "re_blAh_blaHBlaHblahBLAhBlAh"
 ```
 

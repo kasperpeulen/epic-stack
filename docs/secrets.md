@@ -32,15 +32,15 @@ For example, if you were integrating with the `tito` API, to set the
 
 ```sh
 fly secrets set TITO_API_SECRET=some_secret_value --app [YOUR_APP_NAME]
-gh secret set TITO_API_SECRET -e staging --body "some_secret_value"
+# See how to install gh: https://cli.github.com/ 
+gh secret set TITO_API_SECRET -e staging --body "some_secret_value" 
 ```
 
-This will make the secret available to your production and staging environments.
-
-**Note**: You'll also need to add the secret to the `secrets:` section of the staging
-deployment step in `.github/workflows/deploy.yml`:
+Also add the secret to the staging `secrets` section in .github/workflows/deploy.yml
 
 ```yaml
 secrets: |
   TITO_API_SECRET=${{ secrets.TITO_API_SECRET }}
 ```
+
+This will make the secret available to your production and staging environments.

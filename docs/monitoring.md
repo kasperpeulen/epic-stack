@@ -27,6 +27,7 @@ becomes `SENTRY_DSN`). Now, set the sentry dsn secret for production and staging
 
 ```sh
 fly secrets set SENTRY_DSN=<your_dsn> --app [YOUR_APP_NAME]
+# See how to install gh: https://cli.github.com/ 
 gh secret set SENTRY_DSN -e staging --body "<your_dsn>"
 ```
 

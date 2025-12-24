@@ -38,8 +38,7 @@ Prior to your first deployment, you'll need to do a few things:
    fly apps create [YOUR_APP_NAME]
    ```
 
-   > **Note**: Make sure this name matches the `app` set in your `fly.toml`
-   > file. Otherwise, you will not be able to deploy.
+1. Change the app name in fly.toml to name of the app you just created.
 
 1. Initialize Git.
 
@@ -56,42 +55,39 @@ Prior to your first deployment, you'll need to do a few things:
 
 1. Add secrets:
 
-- Add a `FLY_API_TOKEN` to your GitHub repo. To do this, go to your user
-  settings on Fly and create a new
-  [token](https://web.fly.io/user/personal_access_tokens/new), then run:
+- Create a `FLY_API_TOKEN` by running:
 
   ```sh
-  gh secret set FLY_API_TOKEN
+  fly tokens org
   ```
 
-- Add a `SESSION_SECRET` and `HONEYPOT_SECRET` to your fly app secrets for production:
+- Add this token to your GitHub repo:
 
   ```sh
-  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32) --app [YOUR_APP_NAME]
+  gh secret set FLY_API_TOKEN -body "<token>"
+  ```
+
+- Add a `SESSION_SECRET` and `HONEYPOT_SECRET` to your fly app secrets for
+  production:
+
+  ```sh
+  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32)
   ```
 
 > **Note**: If you don't have openssl installed, you can also use
 > [1Password](https://1password.com/password-generator) to generate a random
 > secret, just replace `$(openssl rand -hex 32)` with the generated secret.
 
-- Add those secrets to GitHub for the staging environment:
-
-  ```sh
-  gh api /repos/{owner}/{repo}/environments/staging -X PUT
-  gh secret set SESSION_SECRET -e staging --body "$(openssl rand -hex 32)"
-  gh secret set HONEYPOT_SECRET -e staging --body "$(openssl rand -hex 32)"
-  ```
-
 1. Create production database:
 
    Create a persistent volume for the sqlite database for your production
-   environment. Run the following (feel free to change the GB size based on
-   your needs and the region of your choice
+   environment. Run the following (feel free to change the GB size based on your
+   needs and the region of your choice
    (`https://fly.io/docs/reference/regions/`). If you do change the region, make
    sure you change the `primary_region` in fly.toml as well):
 
    ```sh
-   fly volumes create data --region sjc --size 1 --app [YOUR_APP_NAME]
+   fly volumes create data --region sjc --size 1
    ```
 
 1. Attach Consul:
@@ -101,13 +97,13 @@ Prior to your first deployment, you'll need to do a few things:
   ([learn more about configuring consul](https://fly.io/docs/litefs/getting-started/#lease-configuration)).
 
   ```sh
-  fly consul attach --app [YOUR_APP_NAME]
+  fly consul attach
   ```
 
 1. Set up Tigris object storage:
 
    ```sh
-   fly storage create --app [YOUR_APP_NAME]
+   fly storage create
    ```
 
    This will create a Tigris object storage bucket for your production

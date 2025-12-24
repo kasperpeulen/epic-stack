@@ -169,7 +169,7 @@ jobs:
 
       - name: 📦 Build Production Container
         run: |
-          flyctl deploy \
+          fly deploy \
             --build-only \
             --push \
             --image-label ${{ github.sha }} \
@@ -213,13 +213,14 @@ jobs:
           FLY_REGION=$(fly config show | jq -r '.primary_region')
 
           # Create app if it doesn't exist
-          if ! flyctl status --app "$FLY_APP_NAME"; then
+          if ! fly status --app "$FLY_APP_NAME"; then
             # change org name if needed
-            flyctl apps create $FLY_APP_NAME --org personal
-            flyctl volumes create data --app $FLY_APP_NAME --region $FLY_REGION --size 1 --yes
-            flyctl consul attach --app $FLY_APP_NAME
+            fly apps create $FLY_APP_NAME --org personal
+            fly secrets --app $FLY_APP_NAME set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32)
+            fly volumes create data --app $FLY_APP_NAME --region $FLY_REGION --size 1 --yes
+            fly consul attach --app $FLY_APP_NAME
             # Don't log the created tigris secrets!
-            flyctl storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
+            fly storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
           fi
 
       - name: 🚁 Deploy PR app to Fly.io
@@ -231,8 +232,7 @@ jobs:
             APP_ENV=staging
             ALLOW_INDEXING=false
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-            HONEYPOT_SECRET=${{ secrets.HONEYPOT_SECRET }}
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
           build_args: |
             COMMIT_SHA=${{ github.sha }}
           build_secrets: |
@@ -264,5 +264,5 @@ jobs:
 
       - name: 🚀 Deploy Production
         run: |
-          flyctl deploy \
+          fly deploy \
             --image "registry.fly.io/${{ steps.app_name.outputs.value }}:${{ github.sha }}"
