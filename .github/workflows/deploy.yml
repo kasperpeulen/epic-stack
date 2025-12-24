@@ -7,7 +7,7 @@ on:
     types: [opened, reopened, synchronize, closed]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -183,8 +183,6 @@ jobs:
     if: ${{ github.event_name == 'pull_request_target' }}
     outputs:
       url: ${{ steps.deploy.outputs.url }}
-    concurrency:
-      group: pr-${{ github.event.number }}
     environment:
       name: staging
       url: ${{ steps.deploy.outputs.url }}
