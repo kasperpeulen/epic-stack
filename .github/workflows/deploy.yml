@@ -7,7 +7,7 @@ on:
     types: [opened, reopened, synchronize, closed]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
@@ -49,6 +51,8 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
@@ -76,6 +80,8 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: ⎔ Setup node
         uses: actions/setup-node@v4
@@ -101,6 +107,8 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: 🏄 Copy test env vars
         run: cp .env.example .env
@@ -183,8 +191,6 @@ jobs:
     if: ${{ github.event_name == 'pull_request_target' }}
     outputs:
       url: ${{ steps.deploy.outputs.url }}
-    concurrency:
-      group: pr-${{ github.event.number }}
     environment:
       name: staging
       url: ${{ steps.deploy.outputs.url }}
@@ -193,6 +199,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: '50'
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 👀 Read app name
         uses: SebRollen/toml-action@v1.2.0
@@ -214,29 +221,27 @@ jobs:
           if ! flyctl status --app "$FLY_APP_NAME"; then
             # change org name if needed
             flyctl apps create $FLY_APP_NAME --org $FLY_ORG
-            flyctl secrets --app $FLY_APP_NAME set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32)
-            flyctl volumes create data --app $FLY_APP_NAME --region $FLY_REGION --size 1 --yes
+            flyctl secrets --app $FLY_APP_NAME set \
+              SESSION_SECRET=$(openssl rand -hex 32) \
+              HONEYPOT_SECRET=$(openssl rand -hex 32) \
+              SENTRY_DSN=${{ secrets.SENTRY_DSN }} \
+              RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
             flyctl consul attach --app $FLY_APP_NAME
             # Don't log the created tigris secrets!
             flyctl storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
           fi
 
-      - name: 🚁 Deploy PR app to Fly.io
-        id: deploy
-        uses: superfly/fly-pr-review-apps@1.5.0
-        with:
-          name:
-            ${{ steps.app_name.outputs.value }}-pr-${{ github.event.number }}
-          secrets: |
-            APP_ENV=staging
+          flyctl deploy \
+            --ha false \
+            --regions $FLY_REGION \
+            --vm-size shared-cpu-1x \
+            --envAPP_ENV=staging
             SENTRY_ENVIRONMENT=staging
-            ALLOW_INDEXING=false
-            SENTRY_DSN=${{ secrets.SENTRY_DSN }}
-            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
-          build_args: |
-            COMMIT_SHA=${{ github.sha }}
-          build_secrets: |
-            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+            ALLOW_INDEXING=false\
+            --app $FLY_APP_NAME \             
+            --image-label ${{ github.sha }} \
+            --build-arg COMMIT_SHA=${{ github.sha }} \
+            --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Create Sentry release
         env:
@@ -252,7 +257,8 @@ jobs:
         if: github.event.action == 'closed'
         run: |
           FLY_APP_NAME="${{ steps.app_name.outputs.value }}-pr-${{ github.event.number }}"
-          flyctl storage destroy epic-stack-$FLY_APP_NAME --yes
+          flyctl storage destroy epic-stack-$FLY_APP_NAME --yes || true
+          flyctl apps destroy "$app" -y || true
   deploy:
     name: 🚀 Deploy production
     runs-on: ubuntu-24.04
