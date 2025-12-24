@@ -169,7 +169,7 @@ jobs:
 
       - name: 📦 Build Production Container
         run: |
-          fly deploy \
+          flyctl deploy \
             --build-only \
             --push \
             --image-label ${{ github.sha }} \
@@ -210,17 +210,17 @@ jobs:
         if: github.event.action != 'closed'
         run: |
           FLY_APP_NAME="${{ steps.app_name.outputs.value }}-pr-${{ github.event.number }}"
-          FLY_REGION=$(fly config show | jq -r '.primary_region')
+          FLY_REGION=$(flyctl config show | jq -r '.primary_region')
 
           # Create app if it doesn't exist
-          if ! fly status --app "$FLY_APP_NAME"; then
+          if ! flyctl status --app "$FLY_APP_NAME"; then
             # change org name if needed
-            fly apps create $FLY_APP_NAME --org personal
-            fly secrets --app $FLY_APP_NAME set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32)
-            fly volumes create data --app $FLY_APP_NAME --region $FLY_REGION --size 1 --yes
-            fly consul attach --app $FLY_APP_NAME
+            flyctl apps create $FLY_APP_NAME --org personal
+            flyctl secrets --app $FLY_APP_NAME set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32)
+            flyctl volumes create data --app $FLY_APP_NAME --region $FLY_REGION --size 1 --yes
+            flyctl consul attach --app $FLY_APP_NAME
             # Don't log the created tigris secrets!
-            fly storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
+            flyctl storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
           fi
 
       - name: 🚁 Deploy PR app to Fly.io
@@ -264,5 +264,5 @@ jobs:
 
       - name: 🚀 Deploy Production
         run: |
-          fly deploy \
+          flyctl deploy \
             --image "registry.fly.io/${{ steps.app_name.outputs.value }}:${{ github.sha }}"
