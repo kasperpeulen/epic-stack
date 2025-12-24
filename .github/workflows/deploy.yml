@@ -225,7 +225,8 @@ jobs:
         id: deploy
         uses: superfly/fly-pr-review-apps@1.5.0
         with:
-          name: ${{ steps.app_name.outputs.value }}-pr-${{ github.event.number }}
+          name:
+            ${{ steps.app_name.outputs.value }}-pr-${{ github.event.number }}
           secrets: |
             APP_ENV=staging
             SENTRY_ENVIRONMENT=staging
@@ -236,6 +237,16 @@ jobs:
             COMMIT_SHA=${{ github.sha }}
           build_secrets: |
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Create Sentry release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: 'kasper-peulen-d2924a93'
+          SENTRY_PROJECT: 'epic-rsc-stack'
+        if: ${{ github.event.action != 'closed' && env.SENTRY_AUTH_TOKEN }}
+        uses: getsentry/action-release@v3
+        with:
+          environment: staging
 
       - name: 🧹 Cleanup resources when PR is closed
         if: github.event.action == 'closed'
@@ -280,5 +291,4 @@ jobs:
         if: ${{ env.SENTRY_AUTH_TOKEN }}
         uses: getsentry/action-release@v3
         with:
-          environment:
-            ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+          environment: production
