@@ -230,8 +230,8 @@ jobs:
             # Don't log the created tigris secrets!
             flyctl storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
           fi
-          
-          fly deploy \
+
+          flyctl deploy \
             --ha false \
             --regions $FLY_REGION \
             --vm-size shared-cpu-1x \
