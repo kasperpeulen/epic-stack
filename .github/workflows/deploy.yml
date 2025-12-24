@@ -185,9 +185,9 @@ jobs:
       url: ${{ steps.deploy.outputs.url }}
     concurrency:
       group: pr-${{ github.event.number }}
-    environment:
-      name: staging
-      url: ${{ steps.deploy.outputs.url }}
+#    environment:
+#      name: staging
+#      url: ${{ steps.deploy.outputs.url }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
@@ -246,9 +246,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, typecheck, vitest, playwright, container]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    environment:
-      name: production
-      url: https://${{ steps.app_name.outputs.value }}.fly.dev
+#    environment:
+#      name: production
+#      url: https://${{ steps.app_name.outputs.value }}.fly.dev
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
