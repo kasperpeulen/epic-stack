@@ -220,6 +220,8 @@ jobs:
             # Don't log the created tigris secrets!
             flyctl storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
           fi
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: 🚁 Deploy PR app to Fly.io
         id: deploy
@@ -235,12 +237,17 @@ jobs:
             COMMIT_SHA=${{ github.sha }}
           build_secrets: |
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: 🧹 Cleanup resources when PR is closed
         if: github.event.action == 'closed'
         run: |
           FLY_APP_NAME="${{ steps.app_name.outputs.value }}-pr-${{ github.event.number }}"
           flyctl storage destroy epic-stack-$FLY_APP_NAME --yes
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
   deploy:
     name: 🚀 Deploy production
     runs-on: ubuntu-24.04
@@ -269,3 +276,5 @@ jobs:
         run: |
           flyctl deploy \
             --image "registry.fly.io/${{ steps.app_name.outputs.value }}:${{ github.sha }}"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
