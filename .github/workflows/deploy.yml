@@ -213,7 +213,7 @@ jobs:
           fi
 
           flyctl deploy \
-            --ha=false \ # use only one machine for staging
+            --ha=false \
             --regions $FLY_REGION \
             --vm-size shared-cpu-1x \
             --env APP_ENV=staging \
