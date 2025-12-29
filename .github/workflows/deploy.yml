@@ -212,16 +212,17 @@ jobs:
             flyctl storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
           fi
 
-          flyctl deploy . \
-            --ha=false \ # use only one machine for staging
-            --regions $FLY_REGION \
-            --vm-size shared-cpu-1x \
+          flyctl deploy \
+            --ha=false \
+            --regions=$FLY_REGION \
+            --vm-size=shared-cpu-1x \
             --env APP_ENV=staging \
             --env ALLOW_INDEXING=false \
-            --app $FLY_APP_NAME \
-            --image-label ${{ github.sha }} \
+            --app=$FLY_APP_NAME \
+            --image-label=${{ github.sha }} \
             --build-arg COMMIT_SHA=${{ github.sha }} \
-            --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+            --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
+            .
 
       - name: 🧹 Cleanup resources when PR is closed
         if: ${{ github.event.action == 'closed' && env.FLY_API_TOKEN }}
