@@ -214,8 +214,8 @@ jobs:
 
           flyctl deploy \
             --ha=false \
-            --regions=$FLY_REGION \
-            --vm-size=shared-cpu-1x \
+            --regions $FLY_REGION \
+            --vm-size shared-cpu-1x \
             --env APP_ENV=staging \
             --env ALLOW_INDEXING=false \
             --app=$FLY_APP_NAME \
