@@ -4,7 +4,11 @@ on:
     branches:
       - main
   pull_request:
-    types: [opened, reopened, synchronize, closed]
+    types: [opened, reopened, synchronize]
+  # Clean up the staging environment when a PR is closed
+  # Use pull_request_target to also run when the PR has merge conflicts
+  pull_request_target:
+    types: [closed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -180,8 +184,8 @@ jobs:
   deploy-staging:
     name: 🚁 Deploy staging app for PR
     runs-on: ubuntu-24.04
-    # Only run for PRs from the same repository (skip forks) when PR is not closed
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.action != 'closed' }}
+    # Only run for PRs from the same repository (skip forks)
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     outputs:
       url: ${{ steps.deploy.outputs.url }}
     environment:
@@ -202,6 +206,7 @@ jobs:
       - name: 🎈 Setup Fly
         uses: superfly/flyctl-actions/setup-flyctl@1.5
 
+      #  Inspired by https://github.com/superfly/fly-pr-review-apps/blob/main/entrypoint.sh
       - name: 🚁️ Deploy PR app to Fly.io
         id: deploy
         if: ${{ env.FLY_API_TOKEN }}
@@ -213,11 +218,13 @@ jobs:
           if ! flyctl status --app "$FLY_APP_NAME"; then
             # change org name if needed
             flyctl apps create $FLY_APP_NAME --org $FLY_ORG
-            flyctl secrets --app $FLY_APP_NAME set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32) SENTRY_DSN=${{ secrets.SENTRY_DSN }} RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            flyctl secrets --app $FLY_APP_NAME set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32)
             flyctl consul attach --app $FLY_APP_NAME
             # Don't log the created tigris secrets!
             flyctl storage create --app $FLY_APP_NAME --name epic-stack-$FLY_APP_NAME --yes > /dev/null 2>&1
           fi
+
+          flyctl secrets --app $FLY_APP_NAME set SENTRY_DSN=${{ secrets.SENTRY_DSN }} RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
 
           flyctl deploy \
             --ha=false \
@@ -235,8 +242,7 @@ jobs:
   cleanup-staging:
     name: 🧹 Cleanup staging app
     runs-on: ubuntu-24.04
-    # Only run when PR is closed
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.action == 'closed' }}
+    if: ${{ github.event.action == 'closed' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v4
