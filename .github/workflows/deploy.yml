@@ -241,9 +241,6 @@ jobs:
     # Only run when PR is closed
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.action == 'closed' }}
     steps:
-      - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
-
       - name: 👀 Read app name
         uses: SebRollen/toml-action@v1.2.0
         id: app_name
