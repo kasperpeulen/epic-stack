@@ -228,7 +228,7 @@ jobs:
         run: |
           FLY_APP_NAME="${{ steps.app_name.outputs.value }}-pr-${{ github.event.number }}"
           flyctl storage destroy epic-stack-$FLY_APP_NAME --yes || true
-          flyctl apps destroy "$app" -y || true
+          flyctl apps destroy "$FLY_APP_NAME" -y || true
   deploy:
     name: 🚀 Deploy production
     runs-on: ubuntu-24.04
