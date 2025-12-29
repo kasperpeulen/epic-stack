@@ -33,8 +33,8 @@ ARG COMMIT_SHA
 ENV COMMIT_SHA=$COMMIT_SHA
 
 # Use the following environment variables to configure Sentry
-# ENV SENTRY_ORG=
-# ENV SENTRY_PROJECT=
+ENV SENTRY_ORG="kasper-peulen-d2924a93"
+ENV SENTRY_PROJECT="epic-rsc-stack"
 
 
 WORKDIR /myapp
@@ -64,6 +64,10 @@ ENV CACHE_DATABASE_PATH="$LITEFS_DIR/$CACHE_DATABASE_FILENAME"
 ENV INTERNAL_PORT="8080"
 ENV PORT="8081"
 ENV NODE_ENV="production"
+
+ARG COMMIT_SHA
+ENV SENTRY_RELEASE=$COMMIT_SHA
+
 # For WAL support: https://github.com/prisma/prisma-engines/issues/4675#issuecomment-1914383246
 ENV PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK = "1"
 

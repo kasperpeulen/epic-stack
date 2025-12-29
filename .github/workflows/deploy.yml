@@ -231,6 +231,7 @@ jobs:
             --regions $FLY_REGION \
             --vm-size shared-cpu-1x \
             --env APP_ENV=staging \
+            --env SENTRY_ENVIRONMENT=staging \
             --env ALLOW_INDEXING=false \
             --app $FLY_APP_NAME \
             --image-label ${{ github.sha }} \
@@ -238,6 +239,15 @@ jobs:
             --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
 
           echo "url=https://$FLY_APP_NAME.fly.dev" >> $GITHUB_OUTPUT
+      - name: Create Sentry release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: kasper-peulen-d2924a93
+          SENTRY_PROJECT: epic-rsc-stack
+        if: ${{ env.SENTRY_AUTH_TOKEN }}
+        uses: getsentry/action-release@v3
+        with:
+          environment: staging
 
   cleanup-staging:
     name: 🧹 Cleanup staging app
@@ -290,4 +300,15 @@ jobs:
       - name: 🚀 Deploy Production
         run: |
           flyctl deploy \
+            --env SENTRY_ENVIRONMENT=production \
             --image "registry.fly.io/${{ steps.app_name.outputs.value }}:${{ github.sha }}"
+
+      - name: Create Sentry release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: kasper-peulen-d2924a93
+          SENTRY_PROJECT: epic-rsc-stack
+        if: ${{ env.SENTRY_AUTH_TOKEN }}
+        uses: getsentry/action-release@v3
+        with:
+          environment: production
