@@ -218,8 +218,8 @@ jobs:
             --vm-size shared-cpu-1x \
             --env APP_ENV=staging \
             --env ALLOW_INDEXING=false \
-            --app=$FLY_APP_NAME \
-            --image-label=${{ github.sha }} \
+            --app $FLY_APP_NAME \
+            --image-label ${{ github.sha }} \
             --build-arg COMMIT_SHA=${{ github.sha }} \
             --build-secret SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
             .
