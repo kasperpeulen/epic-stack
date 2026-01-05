@@ -1,0 +1,166 @@
+name: 🔄 Reset upstream-main Branch
+
+on:
+  push:
+    branches:
+      - copilot/reset-upstream-main-branch
+  workflow_dispatch:
+    inputs:
+      target_commit:
+        description: 'Target commit SHA to reset to'
+        required: true
+        default: 'bac7bd445d5d4c7c602399a842518f40ec591f2d'
+      confirm:
+        description: 'Type "confirm" to proceed with the reset'
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  DEFAULT_TARGET_COMMIT: 'bac7bd445d5d4c7c602399a842518f40ec591f2d'
+
+jobs:
+  reset-branch:
+    name: Reset upstream-main to target commit
+    runs-on: ubuntu-22.04
+    # Only run on push events, or on workflow_dispatch with confirmation
+    if: |
+      github.event_name == 'push' || 
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.confirm == 'confirm')
+    
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🎯 Set target commit
+        id: set-target
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET_COMMIT="${{ github.event.inputs.target_commit }}"
+          else
+            TARGET_COMMIT="${{ env.DEFAULT_TARGET_COMMIT }}"
+          fi
+          echo "target_commit=$TARGET_COMMIT" >> $GITHUB_OUTPUT
+          echo "Using target commit: $TARGET_COMMIT"
+      
+      - name: 🔍 Verify target commit exists
+        run: |
+          TARGET_COMMIT="${{ steps.set-target.outputs.target_commit }}"
+          if ! git cat-file -e "$TARGET_COMMIT^{commit}"; then
+            echo "❌ Target commit $TARGET_COMMIT does not exist"
+            exit 1
+          fi
+          echo "✅ Target commit exists: $TARGET_COMMIT"
+          git log --oneline -1 "$TARGET_COMMIT"
+      
+      - name: 📊 Show commits to be removed
+        run: |
+          TARGET_COMMIT="${{ steps.set-target.outputs.target_commit }}"
+          echo "The following commits will be REMOVED from upstream-main:"
+          git log --oneline "$TARGET_COMMIT..origin/upstream-main" || echo "No commits to remove (branch already at or before target)"
+      
+      - name: 🔄 Reset upstream-main branch
+        run: |
+          TARGET_COMMIT="${{ steps.set-target.outputs.target_commit }}"
+          
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Fetch and checkout upstream-main
+          git fetch origin upstream-main
+          git checkout upstream-main
+          
+          # Reset to target commit
+          git reset --hard "$TARGET_COMMIT"
+          
+          echo "✅ Local branch reset complete"
+          echo "Current HEAD:"
+          git log --oneline -1
+      
+      - name: 🚀 Force push to remote
+        run: |
+          git push origin upstream-main --force
+          echo "✅ Successfully force pushed upstream-main to origin"
+      
+      - name: ✅ Verify reset
+        run: |
+          TARGET_COMMIT="${{ steps.set-target.outputs.target_commit }}"
+          
+          # Verify the remote branch
+          REMOTE_SHA=$(git ls-remote origin upstream-main | awk '{print $1}')
+          
+          if [ "$REMOTE_SHA" = "$TARGET_COMMIT" ]; then
+            echo "✅ SUCCESS: upstream-main branch has been reset to $TARGET_COMMIT"
+          else
+            echo "❌ ERROR: Remote branch is at $REMOTE_SHA, expected $TARGET_COMMIT"
+            exit 1
+          fi
+          
+          echo ""
+          echo "Latest commits on upstream-main:"
+          git log --oneline upstream-main -5
+  
+  verify-result:
+    name: Verify upstream-main reset result
+    runs-on: ubuntu-22.04
+    needs: reset-branch
+    if: always()
+    
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🔍 Check reset result
+        run: |
+          TARGET_COMMIT="${{ env.DEFAULT_TARGET_COMMIT }}"
+          
+          # Fetch the latest state
+          git fetch origin upstream-main
+          
+          # Get the current commit on upstream-main
+          CURRENT_SHA=$(git ls-remote origin upstream-main | awk '{print $1}')
+          
+          echo "Target commit: $TARGET_COMMIT"
+          echo "Current upstream-main: $CURRENT_SHA"
+          echo ""
+          
+          if [ "$CURRENT_SHA" = "$TARGET_COMMIT" ]; then
+            echo "✅ VERIFICATION SUCCESS"
+            echo "The upstream-main branch is correctly reset to $TARGET_COMMIT"
+            echo ""
+            echo "Commits on upstream-main:"
+            git log --oneline "$CURRENT_SHA" -5
+            exit 0
+          else
+            echo "❌ VERIFICATION FAILED"
+            echo "The upstream-main branch is at $CURRENT_SHA but should be at $TARGET_COMMIT"
+            echo ""
+            echo "Difference:"
+            git log --oneline "$TARGET_COMMIT..$CURRENT_SHA" 2>/dev/null || echo "Target is ahead of current"
+            exit 1
+          fi
+      
+      - name: 📋 Job summary
+        if: always()
+        run: |
+          TARGET_COMMIT="${{ env.DEFAULT_TARGET_COMMIT }}"
+          CURRENT_SHA=$(git ls-remote origin upstream-main | awk '{print $1}')
+          
+          echo "## Reset Verification Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target commit**: \`$TARGET_COMMIT\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Current commit**: \`$CURRENT_SHA\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$CURRENT_SHA" = "$TARGET_COMMIT" ]; then
+            echo "✅ **Status**: Reset successful" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Status**: Reset failed or incomplete" >> $GITHUB_STEP_SUMMARY
+          fi
