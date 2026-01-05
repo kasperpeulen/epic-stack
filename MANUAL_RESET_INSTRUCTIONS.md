@@ -21,7 +21,17 @@ The `upstream-main` branch needs to be reset to commit `bac7bd445d5d4c7c602399a8
 
 ## Manual Steps Required
 
-Run these commands with appropriate GitHub write access:
+### Option 1: Using the provided script
+
+Run the provided script with repository write access:
+
+```bash
+./reset-upstream-main.sh
+```
+
+### Option 2: Manual commands
+
+Alternatively, run these commands manually with appropriate GitHub write access:
 
 ```bash
 # Fetch the latest
