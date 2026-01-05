@@ -3,9 +3,13 @@
 ## Summary
 The `upstream-main` branch needs to be reset to commit `bac7bd445d5d4c7c602399a842518f40ec591f2d` to match the upstream `epicweb-dev/epic-stack` repository.
 
-##Status
-✅ Local reset prepared
-❌ Remote push requires manual action (sandbox environment limitation)
+## Status
+✅ Local reset prepared  
+⚠️  Remote push requires manual action (sandbox environment limitation)
+
+## Current State
+- **Local `upstream-main` branch**: ✅ Points to `bac7bd445d5d4c7c602399a842518f40ec591f2d`
+- **Remote `origin/upstream-main` branch**: ❌ Still at `ee739f374f43526c885921839c1b9cde9c0997ba`
 
 ## Commits to Remove
 - `ee739f374f43526c885921839c1b9cde9c0997ba` - Merge branch 'kasper/staging-app-per-pr'
