@@ -291,6 +291,8 @@ jobs:
         if: ${{ env.FLY_API_TOKEN }}
         run: |
           flyctl secrets --app ${{ steps.app_name.outputs.value }} set \
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }} \
+            HONEYPOT_SECRET=${{ secrets.HONEYPOT_SECRET }} \
             SENTRY_DSN=${{ secrets.SENTRY_DSN }} \
             RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
 
