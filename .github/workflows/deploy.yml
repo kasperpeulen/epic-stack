@@ -295,6 +295,7 @@ jobs:
             RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
 
       - name: 🚀 Deploy Production
+        if: ${{ env.FLY_API_TOKEN }}
         run: |
           flyctl deploy \
             --image "registry.fly.io/${{ steps.app_name.outputs.value }}:${{ github.sha }}"
