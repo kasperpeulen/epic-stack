@@ -288,6 +288,7 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@1.5
 
       - name: 🔐 Set Production Secrets
+        if: ${{ env.FLY_API_TOKEN }}
         run: |
           flyctl secrets --app ${{ steps.app_name.outputs.value }} set \
             SENTRY_DSN=${{ secrets.SENTRY_DSN }} \
