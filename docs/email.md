@@ -12,10 +12,10 @@ Create [an API Key](https://resend.com/api-keys) and set `RESEND_API_KEY` in
 GitHub secrets for both production and staging:
 
 ```sh
-# Set GitHub secret for production
-gh secret set RESEND_API_KEY --body "re_blAh_blaHBlaHblahBLAhBlAh"
+# Set GitHub secret for production environment
+gh secret set RESEND_API_KEY -e production --body "re_blAh_blaHBlaHblahBLAhBlAh"
 
-# Set GitHub secret for staging
+# Set GitHub secret for staging environment
 gh secret set RESEND_API_KEY -e staging --body "re_blAh_blaHBlaHblahBLAhBlAh"
 ```
 

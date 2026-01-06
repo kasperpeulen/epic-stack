@@ -75,11 +75,11 @@ Prior to your first deployment, you'll need to do a few things:
   SESSION_SECRET=$(openssl rand -hex 32)
   HONEYPOT_SECRET=$(openssl rand -hex 32)
   
-  # Set GitHub secrets for production
-  gh secret set SESSION_SECRET --body "$SESSION_SECRET"
-  gh secret set HONEYPOT_SECRET --body "$HONEYPOT_SECRET"
+  # Set GitHub secrets for production environment
+  gh secret set SESSION_SECRET -e production --body "$SESSION_SECRET"
+  gh secret set HONEYPOT_SECRET -e production --body "$HONEYPOT_SECRET"
   
-  # Set GitHub secrets for staging
+  # Set GitHub secrets for staging environment
   gh secret set SESSION_SECRET -e staging --body "$SESSION_SECRET"
   gh secret set HONEYPOT_SECRET -e staging --body "$HONEYPOT_SECRET"
   ```

@@ -27,10 +27,10 @@ becomes `SENTRY_DSN`). Now, set the sentry dsn secret in GitHub secrets for both
 production and staging:
 
 ```sh
-# Set GitHub secret for production
-gh secret set SENTRY_DSN --body "<your_dsn>"
+# Set GitHub secret for production environment
+gh secret set SENTRY_DSN -e production --body "<your_dsn>"
 
-# Set GitHub secret for staging
+# Set GitHub secret for staging environment
 gh secret set SENTRY_DSN -e staging --body "<your_dsn>"
 ```
 
