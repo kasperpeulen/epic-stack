@@ -287,7 +287,17 @@ jobs:
       - name: 🎈 Setup Fly
         uses: superfly/flyctl-actions/setup-flyctl@1.5
 
+      - name: 🔐 Set Production Secrets
+        if: ${{ env.FLY_API_TOKEN }}
+        run: |
+          flyctl secrets --app ${{ steps.app_name.outputs.value }} set \
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }} \
+            HONEYPOT_SECRET=${{ secrets.HONEYPOT_SECRET }} \
+            SENTRY_DSN=${{ secrets.SENTRY_DSN }} \
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+
       - name: 🚀 Deploy Production
+        if: ${{ env.FLY_API_TOKEN }}
         run: |
           flyctl deploy \
             --image "registry.fly.io/${{ steps.app_name.outputs.value }}:${{ github.sha }}"

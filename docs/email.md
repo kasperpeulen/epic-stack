@@ -9,13 +9,17 @@ email provider) setup.
 > variables.
 
 Create [an API Key](https://resend.com/api-keys) and set `RESEND_API_KEY` in
-both prod and staging:
+GitHub secrets for both production and staging:
 
 ```sh
-fly secrets set RESEND_API_KEY="re_blAh_blaHBlaHblahBLAhBlAh" --app [YOUR_APP_NAME]
-# See how to install gh: https://cli.github.com/
+# Set GitHub secret for production environment
+gh secret set RESEND_API_KEY -e production --body "re_blAh_blaHBlaHblahBLAhBlAh"
+
+# Set GitHub secret for staging environment
 gh secret set RESEND_API_KEY -e staging --body "re_blAh_blaHBlaHblahBLAhBlAh"
 ```
+
+> **Note**: See how to install gh: https://cli.github.com/
 
 Setup a [custom sending domain](https://resend.com/domains) and then make sure
 to update the `from` email address in `app/utils/email.server.ts` and the
