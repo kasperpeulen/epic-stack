@@ -23,14 +23,18 @@ filling out the signup form.
 ## Setting up the sentry-vite plugin
 
 Once you see the onboarding page which has the DSN, copy that somewhere (this
-becomes `SENTRY_DSN`). Now, set the sentry dsn secret for production and
-staging:
+becomes `SENTRY_DSN`). Now, set the sentry dsn secret in GitHub secrets for both
+production and staging:
 
 ```sh
-fly secrets set SENTRY_DSN=<your_dsn> --app [YOUR_APP_NAME]
-# See how to install gh: https://cli.github.com/
+# Set GitHub secret for production
+gh secret set SENTRY_DSN --body "<your_dsn>"
+
+# Set GitHub secret for staging
 gh secret set SENTRY_DSN -e staging --body "<your_dsn>"
 ```
+
+> **Note**: See how to install gh: https://cli.github.com/
 
 See the guides for React Router v7
 [here(library)](https://docs.sentry.io/platforms/javascript/guides/react/features/react-router/v7/)

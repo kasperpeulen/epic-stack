@@ -67,11 +67,21 @@ Prior to your first deployment, you'll need to do a few things:
   gh secret set FLY_API_TOKEN --body "<token>"
   ```
 
-- Add a `SESSION_SECRET` and `HONEYPOT_SECRET` to your fly app secrets for
-  production:
+- Add `SESSION_SECRET` and `HONEYPOT_SECRET` to GitHub secrets for production
+  and staging:
 
   ```sh
-  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) HONEYPOT_SECRET=$(openssl rand -hex 32)
+  # Generate random secrets
+  SESSION_SECRET=$(openssl rand -hex 32)
+  HONEYPOT_SECRET=$(openssl rand -hex 32)
+  
+  # Set GitHub secrets for production
+  gh secret set SESSION_SECRET --body "$SESSION_SECRET"
+  gh secret set HONEYPOT_SECRET --body "$HONEYPOT_SECRET"
+  
+  # Set GitHub secrets for staging
+  gh secret set SESSION_SECRET -e staging --body "$SESSION_SECRET"
+  gh secret set HONEYPOT_SECRET -e staging --body "$HONEYPOT_SECRET"
   ```
 
 > **Note**: If you don't have openssl installed, you can also use
